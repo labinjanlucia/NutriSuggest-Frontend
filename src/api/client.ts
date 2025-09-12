@@ -1,6 +1,6 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http:
-const RECOMMENDATION_API_URL = import.meta.env.VITE_RECOMMENDATION_API_URL || 'http:
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+const RECOMMENDATION_API_URL = import.meta.env.VITE_RECOMMENDATION_API_URL || 'http://localhost:8000/api'
 const TOKEN_KEY = 'nutrisuggest_token'
 export const getStoredToken = (): string | null => {
   return localStorage.getItem(TOKEN_KEY)

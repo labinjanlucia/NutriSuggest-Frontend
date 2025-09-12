@@ -40,17 +40,29 @@
           <h2>Profile & Goals</h2>
         </div>
         <div class="card-content">
-          <div class="info-item" v-if="nutritionStore.todayTargets.calories">
+          <div class="info-item" v-if="userProfile">
+            <div class="info-label">Age</div>
+            <div class="info-value">{{ userProfile.age || 'Not set' }}</div>
+          </div>
+          <div class="info-item" v-if="userProfile">
+            <div class="info-label">Goal</div>
+            <div class="info-value">{{ userProfile.goal ? userProfile.goal.replace('_', ' ').charAt(0).toUpperCase() + userProfile.goal.replace('_', ' ').slice(1) : 'Not set' }}</div>
+          </div>
+          <div class="info-item" v-if="userProfile">
+            <div class="info-label">Activity Level</div>
+            <div class="info-value">{{ userProfile.activity_level ? userProfile.activity_level.charAt(0).toUpperCase() + userProfile.activity_level.slice(1) : 'Not set' }}</div>
+          </div>
+          <div class="info-item" v-if="userProfile?.target_calories">
             <div class="info-label">Daily Calorie Target</div>
-            <div class="info-value">{{ nutritionStore.todayTargets.calories }} calories</div>
+            <div class="info-value">{{ userProfile.target_calories }} calories</div>
           </div>
-          <div class="info-item" v-if="nutritionStore.todayTargets.protein">
+          <div class="info-item" v-if="userProfile?.target_protein_g">
             <div class="info-label">Protein Target</div>
-            <div class="info-value">{{ nutritionStore.todayTargets.protein }}g</div>
+            <div class="info-value">{{ userProfile.target_protein_g }}g</div>
           </div>
-          <div class="info-item" v-if="!nutritionStore.todayTargets.calories">
+          <div class="info-item" v-if="!userProfile">
             <div class="info-label">Profile Status</div>
-            <div class="info-value">Profile not completed</div>
+            <div class="info-value">Profile not loaded</div>
           </div>
           <div class="action-item">
             <router-link to="/profile" class="action-button primary">
@@ -135,6 +147,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const nutritionStore = useNutritionStore()
 const isNutritionist = ref(false)
+const userProfile = ref<any>(null)
 const memberSince = computed(() => {
   if (authStore.user?.created_at) {
     return new Date(authStore.user.created_at).toLocaleDateString()
@@ -143,7 +156,7 @@ const memberSince = computed(() => {
 })
 const loadNutritionistStatus = async () => {
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/profile/nutritionist-status', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -151,7 +164,7 @@ const loadNutritionistStatus = async () => {
     if (response.ok) {
       const result = await response.json()
       console.log('Profile API response:', result)
-      isNutritionist.value = result.data?.profile?.is_nutritionist || false
+      isNutritionist.value = result.data?.is_nutritionist || false
       console.log('Loaded nutritionist status:', isNutritionist.value)
     } else {
       console.error('Profile API response not ok:', response.status, response.statusText)
@@ -163,7 +176,7 @@ const loadNutritionistStatus = async () => {
 const toggleNutritionistRole = async () => {
   try {
     console.log('Saving nutritionist status:', isNutritionist.value)
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/profile/nutritionist-status', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -187,8 +200,34 @@ const toggleNutritionistRole = async () => {
     isNutritionist.value = !isNutritionist.value
   }
 }
+const loadProfileData = async () => {
+  try {
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/profile', {
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    })
+    if (response.ok) {
+      const result = await response.json()
+      console.log('Profile data loaded:', result)
+      userProfile.value = result.data?.profile
+      console.log('userProfile.value set to:', userProfile.value)
+      if (userProfile.value) {
+        nutritionStore.todayTargets.calories = userProfile.value.target_calories || 0
+        nutritionStore.todayTargets.protein = userProfile.value.target_protein_g || 0
+        nutritionStore.todayTargets.carbs = userProfile.value.target_carbs_g || 0
+        nutritionStore.todayTargets.fat = userProfile.value.target_fat_g || 0
+      }
+    } else {
+      console.error('Failed to load profile data:', response.status)
+    }
+  } catch (error) {
+    console.error('Error loading profile data:', error)
+  }
+}
 onMounted(() => {
   loadNutritionistStatus()
+  loadProfileData()
 })
 const exportData = async () => {
   try {
@@ -220,13 +259,13 @@ const exportData = async () => {
     const endDate = new Date().toISOString().split('T')[0]
     const startDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     try {
-      const nutritionResponse = await get(`/nutrition/history?start_date=${startDate}&end_date=${endDate}`)
+      const nutritionResponse = await get(`/intakes?start_date=${startDate}&end_date=${endDate}`)
       exportData.nutrition_data = nutritionResponse.data
     } catch (error) {
       console.log('Could not fetch nutrition history:', error)
     }
     try {
-      const weightResponse = await get('/weight/history?limit=100')
+      const weightResponse = await get('/weights/history?limit=100')
       exportData.weight_data = weightResponse.data
     } catch (error) {
       console.log('Could not fetch weight history:', error)

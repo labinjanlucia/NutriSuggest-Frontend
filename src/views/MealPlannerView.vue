@@ -319,7 +319,7 @@ async function loadMealPlans() {
   try {
     const startDate = formatDate(currentWeekStart.value)
     const endDate = formatDate(getWeekEnd(currentWeekStart.value))
-    const response = await fetch(`http:
+    const response = await fetch(`/api/meal-plans?start_date=${startDate}&end_date=${endDate}`, {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -345,7 +345,7 @@ async function toggleMealCompletion(mealPlan: MealPlan) {
   const originalState = mealPlan.is_completed
   try {
     mealPlan.is_completed = !mealPlan.is_completed
-    const response = await fetch(`http:
+    const response = await fetch(`/api/meal-plans/${mealPlan.id}/toggle`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -411,7 +411,7 @@ async function deleteMealPlan(mealPlan: MealPlan) {
     if (originalIndex !== -1) {
       mealPlans.value.splice(originalIndex, 1)
     }
-    const response = await fetch(`http:
+    const response = await fetch(`/api/meal-plans/${mealPlan.id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`

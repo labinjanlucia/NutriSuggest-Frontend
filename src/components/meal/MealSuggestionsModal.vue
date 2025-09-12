@@ -140,7 +140,7 @@ const getSuggestions = async () => {
   isLoading.value = true
   error.value = null
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/meal-suggestions/smart', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -183,7 +183,7 @@ const addToMealPlan = async () => {
       throw new Error('Invalid suggestion data: missing food or recipe information')
     }
     console.log('Sending meal data:', mealData)
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/meal-plans', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

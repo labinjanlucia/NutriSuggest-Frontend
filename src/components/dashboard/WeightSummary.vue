@@ -101,7 +101,7 @@ const formatWeight = (weight: number | string | null | undefined) => {
 const loadWeightAnalytics = async () => {
   isLoading.value = true
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/weights/analytics', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -174,7 +174,7 @@ const quickLogWeight = async () => {
   if (!quickWeight.value) return
   isSubmitting.value = true
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/weights', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

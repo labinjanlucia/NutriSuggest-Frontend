@@ -197,7 +197,7 @@ const handleSubmit = async () => {
       profileData.target_carbs_g = calculatedTargets.value.target_carbs_g
       profileData.target_fat_g = calculatedTargets.value.target_fat_g
     }
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/profile', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

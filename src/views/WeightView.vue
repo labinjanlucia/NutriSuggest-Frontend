@@ -170,7 +170,7 @@ const logWeight = async () => {
   }
   isLoading.value = true
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/weights', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ const logWeight = async () => {
 }
 const loadWeightHistory = async () => {
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/weights', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -211,7 +211,7 @@ const loadWeightHistory = async () => {
 }
 const loadWeightAnalytics = async () => {
   try {
-    const response = await fetch('http:
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/weights/analytics', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -282,7 +282,7 @@ const updateChart = () => {
 const deleteEntry = async (date: string) => {
   if (!confirm('Are you sure you want to delete this weight entry?')) return
   try {
-    const response = await fetch(`http:
+    const response = await fetch(`/api/weights/${date}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`
