@@ -161,7 +161,21 @@ const canCalculate = computed(() => {
   return form.age && form.gender && form.height_cm && form.weight_kg && form.activity_level && form.goal
 })
 const calculateTargets = async () => {
-  if (!canCalculate.value) return
+  console.log('DEBUG: calculateTargets called - canCalculate.value:', canCalculate.value)
+  if (!canCalculate.value) {
+    console.log('DEBUG: calculateTargets early return - canCalculate is false')
+    return
+  }
+  
+  console.log('DEBUG: calculateTargets - starting calculation with form data:', {
+    age: form.age,
+    gender: form.gender,
+    weight_kg: form.weight_kg,
+    height_cm: form.height_cm,
+    activity_level: form.activity_level,
+    goal: form.goal
+  })
+  
   isCalculating.value = true
   try {
     const targets = await authStore.calculateNutritionTargets({
@@ -172,8 +186,12 @@ const calculateTargets = async () => {
       activity_level: form.activity_level,
       goal: form.goal
     })
+    console.log('DEBUG: calculateTargets - received targets:', targets)
     if (targets) {
       calculatedTargets.value = targets
+      console.log('DEBUG: calculateTargets - set calculatedTargets.value to:', calculatedTargets.value)
+    } else {
+      console.log('DEBUG: calculateTargets - no targets returned')
     }
   } catch (error) {
     console.error('Error calculating targets:', error)
@@ -183,6 +201,18 @@ const calculateTargets = async () => {
 }
 const handleSubmit = async () => {
   try {
+    console.log('DEBUG: handleSubmit - form data:', form)
+    console.log('DEBUG: handleSubmit - calculatedTargets.value:', calculatedTargets.value)
+    console.log('DEBUG: handleSubmit - canCalculate.value:', canCalculate.value)
+    
+    if (!calculatedTargets.value && canCalculate.value) {
+      console.log('Auto-calculating nutrition targets...')
+      await calculateTargets()
+      console.log('DEBUG: After calculateTargets - calculatedTargets.value:', calculatedTargets.value)
+    } else {
+      console.log('DEBUG: Skipping auto-calculation - calculatedTargets exists or canCalculate is false')
+    }
+    
     const profileData: any = {}
     if (form.age) profileData.age = form.age
     if (form.gender) profileData.gender = form.gender
@@ -191,13 +221,17 @@ const handleSubmit = async () => {
     if (form.activity_level) profileData.activity_level = form.activity_level
     if (form.goal) profileData.goal = form.goal
     if (form.target_water_ml) profileData.target_water_ml = form.target_water_ml
+    
     if (calculatedTargets.value) {
       profileData.target_calories = calculatedTargets.value.target_calories
       profileData.target_protein_g = calculatedTargets.value.target_protein_g
       profileData.target_carbs_g = calculatedTargets.value.target_carbs_g
       profileData.target_fat_g = calculatedTargets.value.target_fat_g
+      console.log('Including calculated targets in profile save:', calculatedTargets.value)
+    } else {
+      console.log('No calculated targets available to save')
     }
-    const response = await fetch('' + import.meta.env.VITE_API_URL + '/profile', {
+    const response = await fetch('' + import.meta.env.VITE_API_URL + '/auth/profile', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

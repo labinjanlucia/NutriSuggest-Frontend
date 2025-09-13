@@ -9,6 +9,7 @@ import type {
   NextMealRecommendations
 } from '@/types'
 export const useNutritionStore = defineStore('nutrition', () => {
+  const authStore = useAuthStore()
   const todayIntakes = ref<Intake[]>([])
   const dailyNutrition = ref<DailyNutrition | null>(null)
   const weeklyData = ref<any[]>([])
@@ -32,12 +33,32 @@ export const useNutritionStore = defineStore('nutrition', () => {
     }
   })
   const todayTargets = computed(() => {
-    return dailyNutrition.value?.targets || {
+    const userProfile = authStore.userProfile
+    console.log('DEBUG: todayTargets computed - userProfile:', userProfile)
+    console.log('DEBUG: todayTargets computed - target_calories:', userProfile?.target_calories)
+    console.log('DEBUG: todayTargets computed - target_protein_g:', userProfile?.target_protein_g)
+    console.log('DEBUG: todayTargets computed - target_carbs_g:', userProfile?.target_carbs_g)
+    console.log('DEBUG: todayTargets computed - target_fat_g:', userProfile?.target_fat_g)
+    
+    if (userProfile && userProfile.target_calories) {
+      const targets = {
+        calories: userProfile.target_calories,
+        protein: userProfile.target_protein_g || 150,
+        carbs: userProfile.target_carbs_g || 250,
+        fat: userProfile.target_fat_g || 65
+      }
+      console.log('DEBUG: Using userProfile targets:', targets)
+      return targets
+    }
+    
+    const fallbackTargets = dailyNutrition.value?.targets || {
       calories: 2000,
       protein: 150,
       carbs: 250,
       fat: 65
     }
+    console.log('DEBUG: Using fallback targets:', fallbackTargets)
+    return fallbackTargets
   })
   const todayProgress = computed(() => {
     const total = todayTotal.value

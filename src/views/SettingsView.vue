@@ -212,12 +212,6 @@ const loadProfileData = async () => {
       console.log('Profile data loaded:', result)
       userProfile.value = result.data?.profile
       console.log('userProfile.value set to:', userProfile.value)
-      if (userProfile.value) {
-        nutritionStore.todayTargets.calories = userProfile.value.target_calories || 0
-        nutritionStore.todayTargets.protein = userProfile.value.target_protein_g || 0
-        nutritionStore.todayTargets.carbs = userProfile.value.target_carbs_g || 0
-        nutritionStore.todayTargets.fat = userProfile.value.target_fat_g || 0
-      }
     } else {
       console.error('Failed to load profile data:', response.status)
     }
