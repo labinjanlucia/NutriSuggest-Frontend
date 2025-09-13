@@ -212,22 +212,34 @@ export const useNutritionStore = defineStore('nutrition', () => {
   const addFoodToMeal = async (data: {
     food: any,
     quantity_grams: number,
-    meal_type: string
+    meal_type: string,
+    date?: string
   }): Promise<boolean> => {
     try {
       loading.value.creating = true
       error.value = null
+      const consumedDate = data.date ? new Date(data.date) : new Date()
       const intakeData = {
-        consumed_at: new Date().toISOString(),
+        consumed_at: consumedDate.toISOString(),
         meal_type: data.meal_type,
         items: [{
           food_id: data.food.id,
-          quantity_grams: data.quantity_grams
+          quantity_grams: typeof data.quantity_grams === 'string' ? parseFloat(data.quantity_grams) : data.quantity_grams
         }]
       }
+      console.log('DEBUG: Creating intake with data:', JSON.stringify(intakeData, null, 2))
+      console.log('DEBUG: Date provided:', data.date)
+      console.log('DEBUG: Consumed date ISO:', consumedDate.toISOString())
       const response = await intakesApi.createIntake(intakeData)
       if (response.success) {
-        await fetchTodayNutrition()
+        const today = new Date().toISOString().split('T')[0]
+        const intakeDate = consumedDate.toISOString().split('T')[0]
+        
+        if (intakeDate === today) {
+          await fetchTodayNutrition()
+        } else {
+          await fetchDailyNutrition(intakeDate)
+        }
         return true
       }
       setError('Failed to add food to meal')
@@ -242,23 +254,32 @@ export const useNutritionStore = defineStore('nutrition', () => {
   const addRecipeToMeal = async (data: {
     recipe: any,
     servings: number,
-    meal_type: string
+    meal_type: string,
+    date?: string
   }): Promise<boolean> => {
     try {
       loading.value.creating = true
       error.value = null
       const quantity_grams = data.servings * 100
+      const consumedDate = data.date ? new Date(data.date) : new Date()
       const intakeData = {
-        consumed_at: new Date().toISOString(),
+        consumed_at: consumedDate.toISOString(),
         meal_type: data.meal_type,
         items: [{
           recipe_id: data.recipe.id,
-          quantity_grams: quantity_grams
+          quantity_grams: typeof quantity_grams === 'string' ? parseFloat(quantity_grams) : quantity_grams
         }]
       }
       const response = await intakesApi.createIntake(intakeData)
       if (response.success) {
-        await fetchTodayNutrition()
+        const today = new Date().toISOString().split('T')[0]
+        const intakeDate = consumedDate.toISOString().split('T')[0]
+        
+        if (intakeDate === today) {
+          await fetchTodayNutrition()
+        } else {
+          await fetchDailyNutrition(intakeDate)
+        }
         return true
       }
       setError('Failed to add recipe to meal')

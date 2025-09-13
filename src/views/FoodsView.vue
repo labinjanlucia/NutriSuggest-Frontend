@@ -108,14 +108,7 @@ const viewMode = ref<'my' | 'public'>('public')
 const popularFoods = ref<Food[]>([])
 const recentFoods = ref<Food[]>([])
 const selectedFood = ref<Food>({} as Food)
-const fallbackPopularFoods: Food[] = [
-  { id: -1, name: 'Banana', emoji: '🍌', calories_per_100g: 89, protein_per_100g: 1.1, carbs_per_100g: 23, fat_per_100g: 0.3 },
-  { id: -2, name: 'Chicken Breast', emoji: '🍗', calories_per_100g: 165, protein_per_100g: 31, carbs_per_100g: 0, fat_per_100g: 3.6 },
-  { id: -3, name: 'Brown Rice', emoji: '🍚', calories_per_100g: 123, protein_per_100g: 2.6, carbs_per_100g: 23, fat_per_100g: 0.9 },
-  { id: -4, name: 'Salmon', emoji: '🐟', calories_per_100g: 208, protein_per_100g: 25, carbs_per_100g: 0, fat_per_100g: 12 },
-  { id: -5, name: 'Avocado', emoji: '🥑', calories_per_100g: 160, protein_per_100g: 2, carbs_per_100g: 9, fat_per_100g: 15 },
-  { id: -6, name: 'Greek Yogurt', emoji: '🥛', calories_per_100g: 100, protein_per_100g: 10, carbs_per_100g: 6, fat_per_100g: 0.4 }
-]
+const fallbackPopularFoods: Food[] = []
 const loadFoodsData = async () => {
   isLoading.value = true
   error.value = null

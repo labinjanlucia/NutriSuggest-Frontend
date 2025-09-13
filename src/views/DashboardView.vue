@@ -298,7 +298,7 @@ const addWater = async (amount: number) => {
 }
 const removeWaterEntry = async (id: number) => {
   try {
-    const response = await fetch(`/api/water/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/water/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`
@@ -314,7 +314,7 @@ const removeWaterEntry = async (id: number) => {
 const fetchWaterData = async () => {
   try {
     const today = new Date().toISOString().split('T')[0]
-    const response = await fetch(`/api/water/daily?date=${today}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/water/daily?date=${today}`, {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }

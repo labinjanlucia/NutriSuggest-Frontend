@@ -319,7 +319,7 @@ async function loadMealPlans() {
   try {
     const startDate = formatDate(currentWeekStart.value)
     const endDate = formatDate(getWeekEnd(currentWeekStart.value))
-    const response = await fetch(`/api/meal-plans?start_date=${startDate}&end_date=${endDate}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/meal-plans?start_date=${startDate}&end_date=${endDate}`, {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
@@ -345,7 +345,7 @@ async function toggleMealCompletion(mealPlan: MealPlan) {
   const originalState = mealPlan.is_completed
   try {
     mealPlan.is_completed = !mealPlan.is_completed
-    const response = await fetch(`/api/meal-plans/${mealPlan.id}/toggle`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/meal-plans/${mealPlan.id}/toggle`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -363,18 +363,23 @@ async function toggleMealCompletion(mealPlan: MealPlan) {
     }
     if (mealPlan.is_completed) {
       try {
+        console.log('DEBUG: Meal plan data:', mealPlan)
+        console.log('DEBUG: Meal plan date:', mealPlan.date)
+        console.log('DEBUG: Meal type:', mealPlan.meal_type)
         let intakeAdded = false
         if (mealPlan.food && mealPlan.quantity_grams) {
           intakeAdded = await nutritionStore.addFoodToMeal({
             food: mealPlan.food,
             quantity_grams: mealPlan.quantity_grams,
-            meal_type: mealPlan.meal_type
+            meal_type: mealPlan.meal_type,
+            date: mealPlan.date
           })
         } else if (mealPlan.recipe && mealPlan.servings) {
           intakeAdded = await nutritionStore.addRecipeToMeal({
             recipe: mealPlan.recipe,
             servings: mealPlan.servings,
-            meal_type: mealPlan.meal_type
+            meal_type: mealPlan.meal_type,
+            date: mealPlan.date
           })
         }
         if (intakeAdded) {
@@ -411,7 +416,7 @@ async function deleteMealPlan(mealPlan: MealPlan) {
     if (originalIndex !== -1) {
       mealPlans.value.splice(originalIndex, 1)
     }
-    const response = await fetch(`/api/meal-plans/${mealPlan.id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/meal-plans/${mealPlan.id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`
